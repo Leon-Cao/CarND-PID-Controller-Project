@@ -1,7 +1,30 @@
 # CarND-Controls-PID
 Self-Driving Car Engineer Nanodegree Program
 
----
+## Reflection
+### P,I,D component of the PID algorithm
+ * After did some tuning, I got the below understanding on P,I,D of PID algorithm
+   * P, it directly affects CTE and its effect is the middle one among P,I,D. So, it could set to a less value like < 0.5. otherwise, otherwise it correct the error too much and bring a large overshoot. 
+   * I, its effect for error correction is very big. Espically on the start phase (I means accelerating speed from 0 to target value). On running phase it can be set to 0.02, but in start phase, 0.02 may cause car run out of road. So, I set "I" to 0 if speed less than 20MPH, and set it to 0.02 when speed larger than 20MPH.
+   * D, its effect for error correction is smallest among those 3 parameters. So, it can be set a 'big' value comparing with other parameters. So, Initial it as 3.
+ 
+### How to chose the final hyperparameters
+  * I use twiddle to tune the PID coefficients. Successed on tuning PID, but not so success on tuning throttle. 
+  * Tuning PID coefficients. 
+    * First I set throttle to a fix value. I started at throttle equaled to 0.2， after I got a better PID value. I tried throttle equaled to 0.3 and 0.4. Finally, I used 0.4.
+    * I use twiddle algorithm to tune PID coefficients. First I use p = \[0,0,0\] and dp = \[1,1,1\], but I found it did not work. So, I manually tuned p =\[0.3, 0, 3\]. And then let twiddle to tune a better value. I set dp = \[0.01, 0.01, 0.01\] and executed twiddle once when got 300 CTE value. 
+    * Exist twiddle logic. When average CTE less than 0.01, or, when sum of dp less than 0.0002. After running a long time, both threshold were not touched. Finally, I manuel choiced a set of parameters for PID.
+  * Throttle tunning. It is not successful, but let me describe what I tried.
+    * Target throttle, I set target throttle to 0.4 which means the target speed larger than 40MPH. And the throttle = target_throttle - throttle_correction. 
+    * CTE, CTE should use absolution value. CTE describe the error rate of the middle of road. The error deviation for left and right are same for throttle. If the CTE is big, then should break and let car can correct the error in time and keep car in road.
+    * Initial value of throttle_p. I did not find good initial PID value for throttle. Due to tune steer's PID take me a lot of time. I have no time to tune PID of throttle. Sorry for that.
+    
+### What can be improved
+  * For Twiddle
+    * Now, I think execute twiddle when got 300 CTE value is not good enough, due to 300 CTE point means the road is short, I should set it to a bigger one which can include straight road and curvve road. Then the tuned PID parameter will include two type of road information.
+    * Should initial dp_p, dp_i and dp_d to different value due to the effect of kp, ki and kd are different. Something like dp = \[0.1, 0.002, 0.5\].
+    * Run out of road. When I try to tune PID parameters, the car always run out of road and stop at some place. It stop the twiddle algorithm. So, I should limited the error correction and keep car in road and let twiddle algorithm can keep working to get a better value set.
+    
 
 ## Dependencies
 
